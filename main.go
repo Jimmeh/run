@@ -1,27 +1,41 @@
 package main
 
 import (
-	"context"
-	"log"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Jimmeh/run/cmd/when"
-	"github.com/urfave/cli/v3"
 )
 
+func showUsageMessage() {
+	fmt.Println("Usage: run <cmd>")
+	fmt.Println("Commands:")
+	fmt.Println("    when    when is the best time to run?")
+}
+
 func main() {
-	root := &cli.Command{
-		Name:  "run",
-		Usage: "a cli tool for running utilities",
-		Commands: []*cli.Command{
-			{
-				Name:   "when",
-				Usage:  "when is the best time to run?",
-				Action: when.Exec,
-			},
-		},
+	args := os.Args[1:]
+
+	if len(args) == 0 {
+		showUsageMessage()
+		return
 	}
-	if err := root.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
+
+	cmd := args[0]
+	if strings.ToLower(cmd) == "when" {
+		runWhenCmd()
+	} else {
+		showUsageMessage()
 	}
+}
+
+func runWhenCmd() {
+	api, err := when.NewWeatherApi()
+	if err != nil {
+		fmt.Println("ERR: ", err)
+		return
+	}
+	cmd := when.NewWhenCommand(api)
+	cmd.Run()
 }

@@ -1,14 +1,11 @@
 package when
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-
-	"github.com/urfave/cli/v3"
 )
 
 type Forecast struct {
@@ -24,32 +21,57 @@ type Forecast struct {
 	} `json:"current"`
 }
 
-func Exec(ctx context.Context, c *cli.Command) error {
-	key, found := os.LookupEnv("WEATHER_KEY")
-	if !found {
-		return fmt.Errorf("WEATHER_KEY not found")
-	}
-	res, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/forecast.json?key=%s&q=M28", key))
+type WeatherApi struct {
+	key string
+}
+
+func (api *WeatherApi) getForecast() (Forecast, error) {
+	res, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/forecast.json?key=%s&q=M28", api.key))
 	if err != nil {
-		return err
+		return Forecast{}, err
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		return fmt.Errorf("got %d from api", res.StatusCode)
-	}
-
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return err
+		return Forecast{}, err
 	}
 
 	var forecast Forecast
 	err = json.Unmarshal(body, &forecast)
 	if err != nil {
+		return Forecast{}, err
+	}
+	return forecast, nil
+}
+
+func NewWeatherApi() (ForecastRetriever, error) {
+	key, found := os.LookupEnv("WEATHER_KEY")
+	if !found {
+		return &WeatherApi{}, fmt.Errorf("WEATHER_KEY not found")
+	}
+	return &WeatherApi{
+		key: key,
+	}, nil
+}
+
+type ForecastRetriever interface {
+	getForecast() (Forecast, error)
+}
+
+func NewWhenCommand(forecastRetriever ForecastRetriever) Command {
+	return Command{forecastRetriever: forecastRetriever}
+}
+
+type Command struct {
+	forecastRetriever ForecastRetriever
+}
+
+func (cmd *Command) Run() error {
+	forecast, err := cmd.forecastRetriever.getForecast()
+	if err != nil {
 		return err
 	}
-	fmt.Printf("%v", forecast)
-	fmt.Println()
+	fmt.Println(forecast)
 	return nil
 }
