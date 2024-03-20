@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-type Forecast struct {
+type forecast struct {
 	Location struct {
 		Name    string `json:"name"`
 		Country string `json:"country"`
@@ -21,42 +21,42 @@ type Forecast struct {
 	} `json:"current"`
 }
 
-type WeatherApi struct {
+type weatherApi struct {
 	key string
 }
 
-func (api *WeatherApi) getForecast() (Forecast, error) {
+func (api *weatherApi) getForecast() (forecast, error) {
 	res, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/forecast.json?key=%s&q=M28", api.key))
 	if err != nil {
-		return Forecast{}, err
+		return forecast{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return Forecast{}, err
+		return forecast{}, err
 	}
 
-	var forecast Forecast
-	err = json.Unmarshal(body, &forecast)
+	var f forecast
+	err = json.Unmarshal(body, &f)
 	if err != nil {
-		return Forecast{}, err
+		return forecast{}, err
 	}
-	return forecast, nil
+	return f, nil
 }
 
 func NewWeatherApi() (ForecastRetriever, error) {
 	key, found := os.LookupEnv("WEATHER_KEY")
 	if !found {
-		return &WeatherApi{}, fmt.Errorf("WEATHER_KEY not found")
+		return &weatherApi{}, fmt.Errorf("WEATHER_KEY not found")
 	}
-	return &WeatherApi{
+	return &weatherApi{
 		key: key,
 	}, nil
 }
 
 type ForecastRetriever interface {
-	getForecast() (Forecast, error)
+	getForecast() (forecast, error)
 }
 
 func NewWhenCommand(forecastRetriever ForecastRetriever) Command {
