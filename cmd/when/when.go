@@ -21,7 +21,7 @@ func (cmd command) Run() error {
 	if err != nil {
 		return err
 	}
-	cmd.out.Println(fmt.Sprint(forecast))
+	cmd.out.Println(fmt.Sprintf("location: %s", forecast.Location.Name))
 	return nil
 }
 
