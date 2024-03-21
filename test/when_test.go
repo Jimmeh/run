@@ -11,7 +11,7 @@ type forecasts struct {
 }
 
 func (f forecasts) GetForecast() (when.Forecast, error) {
-	forecastJson := `{"location":{"name":"Manchester"}}`
+	forecastJson := `{"location":{"name":"Manchester", "country":"UK"}, "current":{"temp_c":11.5}}`
 	var result when.Forecast
 	err := json.Unmarshal([]byte(forecastJson), &result)
 	if err != nil {
@@ -31,13 +31,20 @@ func (o console) Println(line string) {
 
 func TestWhenOutput(t *testing.T) {
 	cmd := when.NewWhenCommand(forecasts{}, console{})
-	cmd.Run()
+	err := cmd.Run()
 
-	if len(lines) != 1 {
-		t.Fatalf("expected %d lines; got %d", 1, len(lines))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
 	}
-	expected := "location: Manchester"
-	if lines[0] != expected {
-		t.Fatalf("expected: '%s'; got: '%s'", expected, lines[0])
+
+	expected := []string{
+		"Location: Manchester, UK",
+		"Currently: 11C",
+	}
+
+	for i, line := range expected {
+		if lines[i] != line {
+			t.Fatalf("expected: '%s'; got: '%s'", line, lines[i])
+		}
 	}
 }
