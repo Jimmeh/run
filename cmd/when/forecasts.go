@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-type forecast struct {
+type Forecast struct {
 	Location struct {
 		Name    string `json:"name"`
 		Country string `json:"country"`
@@ -25,22 +25,22 @@ type weatherApi struct {
 	key string
 }
 
-func (api weatherApi) getForecast() (forecast, error) {
+func (api weatherApi) GetForecast() (Forecast, error) {
 	res, err := http.Get(fmt.Sprintf("http://api.weatherapi.com/v1/forecast.json?key=%s&q=M28", api.key))
 	if err != nil {
-		return forecast{}, err
+		return Forecast{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return forecast{}, err
+		return Forecast{}, err
 	}
 
-	var f forecast
+	var f Forecast
 	err = json.Unmarshal(body, &f)
 	if err != nil {
-		return forecast{}, err
+		return Forecast{}, err
 	}
 	return f, nil
 }
