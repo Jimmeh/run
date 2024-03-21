@@ -36,6 +36,6 @@ func runWhenCmd() {
 		fmt.Println("ERR: ", err)
 		return
 	}
-	cmd := when.NewWhenCommand(api)
+	cmd := when.NewWhenCommand(api, when.NewConsoleOutput())
 	cmd.Run()
 }

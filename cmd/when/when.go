@@ -8,20 +8,14 @@ type output interface {
 	Println(line string)
 }
 
-type ConsoleOutput struct{}
-
-func (out ConsoleOutput) Println(line string) {
-	fmt.Println(line)
-}
-
 type forecastRetriever interface {
 	getForecast() (forecast, error)
 }
 
-func NewWhenCommand(forecasts forecastRetriever) command {
+func NewWhenCommand(forecasts forecastRetriever, out output) command {
 	return command{
 		forecasts: forecasts,
-		out:       ConsoleOutput{},
+		out:       out,
 	}
 }
 
