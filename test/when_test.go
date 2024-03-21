@@ -11,7 +11,7 @@ type forecasts struct {
 }
 
 func (f forecasts) GetForecast() (when.Forecast, error) {
-	forecastJson := `{"location":{"name":"Manchester", "country":"UK"}, "current":{"temp_c":11.5}}`
+	forecastJson := `{"location":{"name":"Manchester", "country":"UK"}, "current":{"temp_c":11.5, "condition":{"text":"Windy"}}}`
 	var result when.Forecast
 	err := json.Unmarshal([]byte(forecastJson), &result)
 	if err != nil {
@@ -39,7 +39,7 @@ func TestWhenOutput(t *testing.T) {
 
 	expected := []string{
 		"Location: Manchester, UK",
-		"Currently: 11C",
+		"Currently: 11C - Windy",
 	}
 
 	for i, line := range expected {

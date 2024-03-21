@@ -22,7 +22,7 @@ func (cmd command) Run() error {
 		return err
 	}
 	cmd.out.Println(fmt.Sprintf("Location: %s, %s", forecast.Location.Name, forecast.Location.Country))
-	cmd.out.Println(fmt.Sprintf("Currently: %dC", int(forecast.Now.Temp)))
+	cmd.out.Println(fmt.Sprintf("Currently: %dC - %s", int(forecast.Now.Temp), forecast.Now.Condition.Text))
 	return nil
 }
 
